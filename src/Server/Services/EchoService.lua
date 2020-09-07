@@ -18,10 +18,10 @@ function EchoService:Start()
     local npc_directory = game.Workspace['NPC'] --put the name of the folder here
     local npcs = npc_directory:GetChildren();
 
-    for _,v in pairs(npcs) do
-        print (v.name)
-        MakeAClone(v)
-    end
+    -- for _,v in pairs(npcs) do
+        -- print (v.name)
+        -- MakeAClone(v)
+    -- end
 	
 end
 
