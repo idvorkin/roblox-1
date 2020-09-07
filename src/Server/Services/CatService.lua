@@ -2,15 +2,21 @@
 -- Username
 -- September 7, 2020
 
-local _ 
+local _  = nill
+local Players
 local count_cats = 20
+local g_last_player_spawned =  nil  -- LastPlayerAdded
 local player_pos = Vector3.new(0,0,0)
 
 -- Can't figure out how to map to in game position, so store it externally
 -- Arguably, this is closer to a view model, so it's more gooder
 
+function PrintTopLine(txt)
+  game.Workspace.Billboard.Label1.Text = txt
+end
 
-function MakeAClone(template)
+
+function Clone(template)
     local clone = template:Clone()
     clone.Parent = game.Workspace
     clone.Name = "CLONE:" .. clone.Name 
@@ -26,39 +32,54 @@ function randomNegate(x)
 end 
 
 function MoveOneSquareRandom(model)
-    print('moving one')
     old_pos = model.PrimaryPart.Position
     local new_x  = old_pos.X + randomNegate(1) 
     local new_z  = old_pos.Z + randomNegate(1)
     local new_pos = Vector3.new(new_x,old_pos.y, new_z)
-    print (old_pos)
-    print (new_pos)
+    -- print (old_pos)
+    -- print (new_pos)
     model:MoveTo(new_pos)
 end
 
 function MoveRandom(model)
-    print('moving random')
     local radius = 100
     local x = math.random(-1*radius, 1*radius)
     local z = math.random(-1*radius, 1*radius)
     local location = Vector3.new(x,0,z)
-    print (location)
     model:MoveTo(location)
 end
 
-function MoveZach(model)
+local function onPlayerAdded(player)
+    local onCharacterAdded = function (character)
+        g_last_player_spawned = character
+        PrintTopLine(character.Name .. " Is the new Cat Lady")
+    end
+
+	if player.Character then
+        onCharacterAdded(player.Character)
+    else
+	    -- Listen for the player (re)spawning 
+	    player.CharacterAdded:Connect(onCharacterAdded)
+	end
+end
+ 
+
+
+function MoveHowZachWants(model)
     DanceUpAndDown(model)
-    MoveCloserToPosition(model, player_pos)
+    local target_pos = player_pos
+    if g_catLady ~= nil then
+        target_pos = g_catLady.PrimaryPart.Position
+    end 
+    MoveCloserToPosition(model, target_pos)
 end 
 
 function MoveCloserToPosition(model, player_pos)
     old_pos = model.PrimaryPart.Position
-
-    -- Start with x
     local delta_x=0
     local delta_y=0
     local delta_z=0
-    local velocity = 5
+    local velocity = 2
 
     if old_pos.x > player_pos.x then
         delta_x = -1* velocity
@@ -72,29 +93,25 @@ function MoveCloserToPosition(model, player_pos)
         delta_z = 1*velocity
     end 
 
-    -- Fix the x co-ordinate
-    local location = Vector3.new(old_pos.X + delta_x, old_pos.Y + delta_y, old_pos.Z + delta_z)
-    model:MoveTo(location)
+    local delta = Vector3.new (delta_x, delta_y, delta_z)
+    local new_pos = old_pos + delta
+    model:MoveTo(new_pos)
 end 
 
 function DanceUpAndDown(model)
     old_pos = model.PrimaryPart.Position
-    --local new_x  = old_pos.X + randomNegate(1) 
-    --local new_z  = old_pos.Z + randomNegate(1)
-
     local rand = math.random() -- return a number from 0 to 1
+    local velocity = 5
     local delta_y = 1
 
     if rand > 0.5 then
-        delta_y = 1 * math.random(5)
+        delta_y = 1 * math.random(velocity)
     else
-        delta_y = -1 * math.random(5)
+        delta_y = -1 * math.random(velocity)
     end 
 
-    local new_pos = Vector3.new(old_pos.X,old_pos.Y+delta_y, old_pos.Z)
+    local new_pos = old_pos + Vector3.new(0,delta_y, 0)
     model:MoveTo(new_pos)
-    --print (old_pos)
-    --print (new_pos)
 end
 
 
@@ -102,24 +119,32 @@ local CatService = {Client = {}}
 
 function CatService:Start()
     _ = self.Shared.underscore
+    -- Should be in it's own service
+    local Players = game:GetService("Players")
+    -- Iterate over each player already connected
+    _.each(Players:GetPlayers(), onPlayerAdded)
+    -- Listen for newly connected players
+    Players.PlayerAdded:Connect(onPlayerAdded)
+
     print('CatService:Start v0.1')
-    local radius = 100
+
     local catTemplate = game.Workspace.Templates.Cat --put the name of the folder here
+    local all_cats = _.map(_.range(count_cats), function (i) return Clone(catTemplate) end)
 
-    local all_cats = _.map(_.range(count_cats), function (i) 
-        return MakeAClone(catTemplate) 
-    end)
-
-    -- Set initial Values
+    --  Move to random locations
     _.each(all_cats, MoveRandom)
 
+    local eachTick = function (cat)
+        MoveHowZachWants(cat)
+    end
+
+
+    -- Cat Game Loop
     _.each(_.range(1000), function (i)
-        -- _.each(all_cats, MoveOneSquareRandom)
-        _.each(all_cats, MoveZach)
+        _.each(all_cats, eachTick)
         wait (1)
     end )
 end
-
 
 function CatService:Init()
 	
