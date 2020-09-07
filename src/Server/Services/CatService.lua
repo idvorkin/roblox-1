@@ -114,7 +114,7 @@ function CatService:Start()
 
     print('CatService:Start v0.2')
 
-    self.Shared.PlayerModule.ConnectOnNewCharacter(_, NewCrazyCatLady)
+    self.Shared.PlayerLifeCycleModule.ConnectOnNewCharacter(_, NewCrazyCatLady)
 
     local catTemplate = game.Workspace.Templates.Cat --put the name of the folder here
 

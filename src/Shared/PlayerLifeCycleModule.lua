@@ -1,10 +1,12 @@
--- Player Module
+-- Player Life Cycle Module
 -- Username
 -- September 7, 2020
 
-local PlayerModule = {}
 
-local function onPlayerAdded(player, onCharacterAdded)
+
+local PlayerLifeCycleModule = {}
+
+local function onPlayerAdded(onCharacterAdded,player)
 	if player.Character then
         onCharacterAdded(player.Character)
     else
@@ -13,7 +15,7 @@ local function onPlayerAdded(player, onCharacterAdded)
 	end
 end
 
-function PlayerModule.ConnectOnNewCharacter(underscore_module,onCharacterAdded)
+function PlayerLifeCycleModule.ConnectOnNewCharacter(underscore_module,onCharacterAdded)
     -- BLEH Need to figure out how to get this stuff passed in.
     -- local _ = self.Shared.underscore
     -- Should be in it's own service
@@ -30,4 +32,5 @@ function PlayerModule.ConnectOnNewCharacter(underscore_module,onCharacterAdded)
 end
 
 
-return PlayerModule
+
+return PlayerLifeCycleModule
