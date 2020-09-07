@@ -6,12 +6,13 @@ local _  = nill
 local Players
 local count_cats = 20
 local g_last_player_spawned =  nil  -- LastPlayerAdded
-local player_pos = Vector3.new(0,0,0)
+local player_pos = Vector3.new(100,0,100)
 
 -- Can't figure out how to map to in game position, so store it externally
 -- Arguably, this is closer to a view model, so it's more gooder
 
 function PrintTopLine(txt)
+  print (txt)
   game.Workspace.Billboard.Label1.Text = txt
 end
 
@@ -49,27 +50,11 @@ function MoveRandom(model)
     model:MoveTo(location)
 end
 
-local function onPlayerAdded(player)
-    local onCharacterAdded = function (character)
-        g_last_player_spawned = character
-        PrintTopLine(character.Name .. " Is the new Cat Lady")
-    end
-
-	if player.Character then
-        onCharacterAdded(player.Character)
-    else
-	    -- Listen for the player (re)spawning 
-	    player.CharacterAdded:Connect(onCharacterAdded)
-	end
-end
- 
-
-
 function MoveHowZachWants(model)
     DanceUpAndDown(model)
     local target_pos = player_pos
-    if g_catLady ~= nil then
-        target_pos = g_catLady.PrimaryPart.Position
+    if g_last_player_spawned ~= nil then
+        target_pos = g_last_player_spawned.PrimaryPart.Position
     end 
     MoveCloserToPosition(model, target_pos)
 end 
@@ -79,7 +64,7 @@ function MoveCloserToPosition(model, player_pos)
     local delta_x=0
     local delta_y=0
     local delta_z=0
-    local velocity = 2
+    local velocity = 5
 
     if old_pos.x > player_pos.x then
         delta_x = -1* velocity
@@ -117,29 +102,34 @@ end
 
 local CatService = {Client = {}}
 
+
+function NewCrazyCatLady(character)
+    g_last_player_spawned = character
+    PrintTopLine(character.Name .. " Is the new Cat Lady")
+end
+
+
 function CatService:Start()
     _ = self.Shared.underscore
-    -- Should be in it's own service
-    local Players = game:GetService("Players")
-    -- Iterate over each player already connected
-    _.each(Players:GetPlayers(), onPlayerAdded)
-    -- Listen for newly connected players
-    Players.PlayerAdded:Connect(onPlayerAdded)
 
-    print('CatService:Start v0.1')
+    print('CatService:Start v0.2')
+
+    self.Shared.PlayerModule.ConnectOnNewCharacter(_, NewCrazyCatLady)
 
     local catTemplate = game.Workspace.Templates.Cat --put the name of the folder here
+
+    -- Create Cats
     local all_cats = _.map(_.range(count_cats), function (i) return Clone(catTemplate) end)
 
-    --  Move to random locations
+    --  Move cats to random locations
     _.each(all_cats, MoveRandom)
 
+    -- For Each Cat in Each Tick
     local eachTick = function (cat)
         MoveHowZachWants(cat)
     end
 
-
-    -- Cat Game Loop
+    -- Run The Cat Game Loop
     _.each(_.range(1000), function (i)
         _.each(all_cats, eachTick)
         wait (1)
