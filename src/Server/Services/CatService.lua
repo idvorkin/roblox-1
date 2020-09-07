@@ -2,6 +2,9 @@
 -- Username
 -- September 7, 2020
 
+local _ 
+
+
 function MakeAClone(template)
     local clone = template:Clone()
     clone.Parent = game.Workspace
@@ -14,12 +17,12 @@ local BaseCat = 0
 
 
 function CatService:Start()
-    local npc_directory = game.Workspace['NPC'] --put the name of the folder here
-    local npcs = npc_directory:GetChildren();
-    for _,v in pairs(npcs) do
-        print (v.name)
-        MakeAClone(v)
-    end
+    -- _ = self.Modules.underscore
+    _ = self.Shared.underscore
+    local catTemplate = game.Workspace.Templates.Cat --put the name of the folder here
+    _.each(_.range(5), function (i) 
+        MakeAClone(catTemplate)
+    end) 
 end
 
 
