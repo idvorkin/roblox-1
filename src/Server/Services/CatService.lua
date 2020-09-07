@@ -58,13 +58,18 @@ function MoveCloserToPosition(model, player_pos)
     local delta_x=0
     local delta_y=0
     local delta_z=0
+    local velocity = 5
 
     if old_pos.x > player_pos.x then
-        delta_x = 1
-    elseif  (old_pos.x > player_pos.x) then
-        delta_x = -1
-    else 
-        -- They're equal, do nothing
+        delta_x = -1* velocity
+    elseif  (old_pos.x < player_pos.x) then
+        delta_x = 1*velocity
+    end 
+
+    if old_pos.z > player_pos.z then
+        delta_z = -1*velocity
+    elseif  (old_pos.z < player_pos.z) then
+        delta_z = 1*velocity
     end 
 
     -- Fix the x co-ordinate
@@ -97,7 +102,7 @@ local CatService = {Client = {}}
 
 function CatService:Start()
     _ = self.Shared.underscore
-    print('CatService:Start')
+    print('CatService:Start v0.1')
     local radius = 100
     local catTemplate = game.Workspace.Templates.Cat --put the name of the folder here
 
